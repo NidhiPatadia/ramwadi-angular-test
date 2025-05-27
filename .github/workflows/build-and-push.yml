@@ -28,7 +28,7 @@ jobs:
 
       # Step 4: Build the Angular app
       - name: Build Angular App
-        run: npm run build -- --prod  # Adjust based on your package.json build script
+        run: npm run build  # Adjust based on your package.json build script
 
       # Step 5: Checkout the compiled JS repository (nidhi-test)
       - name: Checkout Compiled JS Repository
