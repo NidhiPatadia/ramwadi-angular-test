@@ -1,6 +1,5 @@
 name: Build and Push Compiled JS
 
-# Trigger the pipeline manually
 on:
   workflow_dispatch:
 
@@ -9,45 +8,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the Angular repository (ramwadi-angular-test) on the dev branch
       - name: Checkout Angular Repository
         uses: actions/checkout@v4
         with:
-          ref: dev  # Check out the dev branch
+          ref: dev
 
-      # Step 2: Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # Use a Node.js version compatible with your Angular project
+          node-version: '20'
           cache: 'npm'
 
-      # Step 3: Install dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # Step 4: Build the Angular app
       - name: Build Angular App
-        run: npm run build  # Adjust based on your package.json build script
+        run: npm run build
 
-      # Step 5: Checkout the compiled JS repository (nidhi-test)
       - name: Checkout Compiled JS Repository
         uses: actions/checkout@v4
         with:
-          repository: NidhiPatadia/nidhi-test  # Replace <your-username> with your GitHub username
-          path: nidhi-test
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}  # Use the PAT for access
+          repository: NidhiPatadia/nidhi-test
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          path: compiled-js  # Use a distinct path to avoid confusion
 
-      # Step 6: Copy compiled JS to the nidhi-test repo
       - name: Copy Compiled JS
         run: |
-          rm -rf nidhi-test/*  # Clear the nidhi-test repo's contents
-          cp -r dist/* nidhi-test/  # Copy the compiled output (adjust 'dist' if your output folder differs)
+          rm -rf compiled-js/*  # Clear the contents of the cloned nidhi-test repo
+          cp -r dist/ramwadi-angular/* compiled-js/  # Copy the contents of dist/ramwadi-angular directly into the root
 
-      # Step 7: Commit and push to the nidhi-test repo
       - name: Commit and Push to Compiled JS Repo
         run: |
-          cd nidhi-test
+          cd compiled-js
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add .
