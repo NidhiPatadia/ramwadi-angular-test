@@ -1,0 +1,55 @@
+name: Build and Push Compiled JS
+
+# Trigger the pipeline manually
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the Angular repository (ramwadi-angular-test) on the dev branch
+      - name: Checkout Angular Repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev  # Check out the dev branch
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'  # Use a Node.js version compatible with your Angular project
+          cache: 'npm'
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Build the Angular app
+      - name: Build Angular App
+        run: npm run build -- --prod  # Adjust based on your package.json build script
+
+      # Step 5: Checkout the compiled JS repository (nidhi-test)
+      - name: Checkout Compiled JS Repository
+        uses: actions/checkout@v4
+        with:
+          repository: NidhiPatadia/nidhi-test  # Replace <your-username> with your GitHub username
+          path: nidhi-test
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}  # Use the PAT for access
+
+      # Step 6: Copy compiled JS to the nidhi-test repo
+      - name: Copy Compiled JS
+        run: |
+          rm -rf nidhi-test/*  # Clear the nidhi-test repo's contents
+          cp -r dist/* nidhi-test/  # Copy the compiled output (adjust 'dist' if your output folder differs)
+
+      # Step 7: Commit and push to the nidhi-test repo
+      - name: Commit and Push to Compiled JS Repo
+        run: |
+          cd nidhi-test
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update compiled JS from ramwadi-angular-test dev branch build"
+          git push
